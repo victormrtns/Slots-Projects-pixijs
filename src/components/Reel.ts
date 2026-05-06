@@ -1,7 +1,6 @@
 import { Container, Sprite, Texture, Graphics } from 'pixi.js';
 import { SYMBOL_KEYS, SymbolKey, SYMBOL_ANIM_FRAMES } from '../assets/assets';
-
-const SYMBOL_ANIM_FPS = 22;
+import { GAME_CONFIG } from '../config/GameConfig';
 
 /** Sprite augmented with its current symbol key + per-sprite frame offset. */
 type AnimSprite = Sprite & { symbolKey: SymbolKey; frameOffset: number };
@@ -16,8 +15,9 @@ export const SYMBOL_H = 157;
 export const VISIBLE_ROWS = 5;
 const STRIP_SYMBOLS = 8;
 
-const SPIN_SPEED = 48;
-const BOUNCE_AMOUNT = 22;
+const SPIN_SPEED = GAME_CONFIG.animation.spinSpeed;
+const BOUNCE_AMOUNT = GAME_CONFIG.animation.bounceAmount;
+const SYMBOL_ANIM_FPS = GAME_CONFIG.animation.symbolAnimFPS;
 
 type ReelState = 'idle' | 'spinning' | 'stopping' | 'bouncing';
 
@@ -47,10 +47,10 @@ export class Reel extends Container {
     for (let i = 0; i < STRIP_SYMBOLS; i++) {
       const key = randomSymbolKey();
       const sprite = new Sprite(Texture.from(frameKey(key, 0))) as AnimSprite;
-      sprite.symbolKey   = key;
+      sprite.symbolKey = key;
       sprite.frameOffset = Math.floor(Math.random() * SYMBOL_ANIM_FRAMES);
       sprite.anchor.set(0.5);
-      sprite.width  = SYMBOL_W * 0.85;
+      sprite.width = SYMBOL_W * 0.85;
       sprite.height = SYMBOL_H * 0.85;
       sprite.x = SYMBOL_W / 2;
       sprite.y = i * SYMBOL_H + SYMBOL_H / 2;
@@ -73,7 +73,9 @@ export class Reel extends Container {
   stop(): Promise<void> {
     if (this.state !== 'spinning') return Promise.resolve();
     this.state = 'stopping';
-    return new Promise((resolve) => { this.resolveStop = resolve; });
+    return new Promise((resolve) => {
+      this.resolveStop = resolve;
+    });
   }
 
   update(delta: number) {
@@ -167,6 +169,10 @@ export class Reel extends Container {
     }
   }
 
-  get reelWidth():  number { return SYMBOL_W; }
-  get reelHeight(): number { return SYMBOL_H * VISIBLE_ROWS; }
+  get reelWidth(): number {
+    return SYMBOL_W;
+  }
+  get reelHeight(): number {
+    return SYMBOL_H * VISIBLE_ROWS;
+  }
 }
