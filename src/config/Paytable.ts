@@ -19,14 +19,14 @@ export const PAYTABLE: Record<SymbolKey, Partial<Record<number, number>>> = {
 
 /** Reel weight per symbol — lower = rarer. Used when generating random grids. */
 export const SYMBOL_WEIGHTS: Record<SymbolKey, number> = {
-  safe:       1,
-  bank:       1,
-  dynamite:   2,
-  handcuffs:  2,
-  camera:     2,
-  letterA:    3,
-  letterK:    3,
-  letterQ:    4,
-  letterJ:    4,
-  number10:   4,
+  safe:       8,
+  bank:       8,
+  dynamite:   6,
+  handcuffs:  6,
+  camera:     6,
+  letterA:    1,
+  letterK:    1,
+  letterQ:    1,
+  letterJ:    1,
+  number10:   1,
 };

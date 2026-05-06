@@ -12,6 +12,9 @@ export const FOX_IDLE_FRAMES = 21;
 export const FOX_WIN_FRAMES = 21;
 export const COIN_FRAMES = 46;
 export const BIG_WIN_FRAMES = 46;
+export const MEGA_WIN_FRAMES = 46;
+export const SUPER_MEGA_WIN_FRAMES = 46;
+export const TOTAL_WIN_FRAMES = 46;
 
 // DRY helper: generates frame keys and asset paths
 function getFrameAssets(
@@ -54,6 +57,9 @@ const foxWinAssets = getFrameAssets('fox_win', 'character/win', FOX_WIN_FRAMES, 
 // Effects
 const coinAssets = getFrameAssets('coin', 'coins', COIN_FRAMES, (n) => `Golden_coin_1_${n}`);
 const bigWinAssets = getFrameAssets('bigwin', 'wins/big_win', BIG_WIN_FRAMES, (n) => `Big_Win_${n}`);
+const megaWinAssets = getFrameAssets('megawin', 'wins/mega_win', MEGA_WIN_FRAMES, (n) => `Mega_Win_${n}`);
+const superMegaWinAssets = getFrameAssets('supermegawin', 'wins/super_mega_win', SUPER_MEGA_WIN_FRAMES, (n) => `Super_Mega_Win_${n}`);
+const totalWinAssets = getFrameAssets('totalwin', 'wins/total_win', TOTAL_WIN_FRAMES, (n) => `Total_Win_${n}`);
 
 const uiAssets = {
   ui_bg: '/assets/ui/bg.png',
@@ -78,6 +84,9 @@ export const ASSET_MANIFEST = {
         ...foxWinAssets,
         ...coinAssets,
         ...bigWinAssets,
+        ...megaWinAssets,
+        ...superMegaWinAssets,
+        ...totalWinAssets,
         ...uiAssets,
       },
     },
@@ -93,6 +102,9 @@ export const getFoxIdleKeys = (): string[] => getFrameKeys('fox_idle', FOX_IDLE_
 export const getFoxWinKeys = (): string[] => getFrameKeys('fox_win', FOX_WIN_FRAMES);
 export const getCoinKeys = (): string[] => getFrameKeys('coin', COIN_FRAMES);
 export const getBigWinKeys = (): string[] => getFrameKeys('bigwin', BIG_WIN_FRAMES);
+export const getMegaWinKeys = (): string[] => getFrameKeys('megawin', MEGA_WIN_FRAMES);
+export const getSuperMegaWinKeys = (): string[] => getFrameKeys('supermegawin', SUPER_MEGA_WIN_FRAMES);
+export const getTotalWinKeys = (): string[] => getFrameKeys('totalwin', TOTAL_WIN_FRAMES);
 
 export const getSymbolAnimKeys = (key: SymbolKey): string[] =>
   getFrameKeys(key, SYMBOL_ANIM_FRAMES);

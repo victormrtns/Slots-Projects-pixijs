@@ -1,6 +1,6 @@
 import { Container, Ticker, Rectangle } from 'pixi.js';
 import { CoinShower } from './CoinShower';
-import { BigWinAnimation } from './BigWinAnimation';
+import { BigWinAnimation, WinTier } from './BigWinAnimation';
 import { ReelGlow } from './ReelGlow';
 
 export class WinEffectsManager {
@@ -21,7 +21,7 @@ export class WinEffectsManager {
     );
   }
 
-  triggerAll(reelBounds: Rectangle): void {
+  triggerAll(reelBounds: Rectangle, tier: WinTier = 'big_win'): void {
     const reelCx = reelBounds.x + reelBounds.width / 2;
     const reelCy = reelBounds.y + reelBounds.height / 2;
 
@@ -38,11 +38,10 @@ export class WinEffectsManager {
       width: reelBounds.width,
     });
 
-    this.bigWinAnimation.play({
-      cx: reelCx,
-      cy: reelCy,
-      targetWidth: reelBounds.width * 0.8,
-    });
+    this.bigWinAnimation.play(
+      { cx: reelCx, cy: reelCy, targetWidth: reelBounds.width * 0.8 },
+      tier,
+    );
   }
 
   getContainer(): Container {

@@ -28,6 +28,13 @@ export const GAME_CONFIG = {
     minBetStep: 10,
     minWinMultiplier: 2,
     maxWinMultiplier: 12,
+    /** Win multiplier thresholds — which animation plays based on totalWin / bet */
+    winTiers: {
+      bigWin: 2,         // >= 10× bet
+      megaWin: 4,        // >= 25× bet
+      superMegaWin: 8,   // >= 50× bet
+      totalWin: 25,      // >= 100× bet
+    },
   },
   animation: {
     foxFPS: 18,

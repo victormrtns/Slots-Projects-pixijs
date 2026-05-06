@@ -3,6 +3,7 @@ import { GAME_CONFIG, WORLD_SCALE } from '../config/GameConfig';
 import { SlotMachine } from '../components/SlotMachine';
 import { FoxCharacter } from '../components/FoxCharacter';
 import { WinEffectsManager } from '../effects/WinEffectsManager';
+import { BigWinAnimation } from '../effects/BigWinAnimation';
 import { GameState } from '../game/GameState';
 import { fadeIn } from '../utils/fadeIn';
 import { SYMBOL_W, SYMBOL_H } from '../components/Reel';
@@ -218,7 +219,8 @@ export class HomeScene extends Container {
       6 * SYMBOL_W,
       5 * SYMBOL_H
     );
-    this.winEffectsManager.triggerAll(reelBounds);
+    const tier = BigWinAnimation.resolveTier(this.gameState.lastWin, this.gameState.bet);
+    this.winEffectsManager.triggerAll(reelBounds, tier);
   }
 
   private initializeGameState() {
