@@ -57,11 +57,9 @@ export class HomeScene extends Container {
     this.slotMachine.onSpinComplete(() => {
       this.spinning = false;
       this.setSpinEnabled(true);
-
-      const result = this.gameState.calculateResult();
       this.updateLabels();
 
-      if (result.won) {
+      if (this.gameState.lastWin > 0) {
         this.triggerWinEffects();
         this.foxCharacter.setMode('win');
       } else {
@@ -199,6 +197,11 @@ export class HomeScene extends Container {
     }
 
     this.updateLabels();
+
+    // Calculate result BEFORE spinning — determines which symbols the reels land on
+    const result = this.gameState.resolveSpinResult();
+    this.slotMachine.setResult(result.grid);
+
     await this.slotMachine.startSpin();
   }
 

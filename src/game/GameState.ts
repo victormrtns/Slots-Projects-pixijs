@@ -1,8 +1,9 @@
 import { EventEmitter } from '../utils/EventEmitter';
 import { GAME_CONFIG } from '../config/GameConfig';
+import { generateSpinResult, SpinResult, WinLine } from './SpinResultGenerator';
 
 export interface GameStateEvents extends Record<string, any> {
-  win: { amount: number };
+  win: { amount: number; winningLines: WinLine[] };
   lose: void;
 }
 
@@ -10,6 +11,7 @@ export class GameState extends EventEmitter<GameStateEvents> {
   private _balance: number = 4000;
   private _bet: number = 100;
   private _lastWin: number = 0;
+  private _lastResult: SpinResult | null = null;
 
   get balance(): number {
     return this._balance;
@@ -23,6 +25,10 @@ export class GameState extends EventEmitter<GameStateEvents> {
     return this._lastWin;
   }
 
+  get lastResult(): SpinResult | null {
+    return this._lastResult;
+  }
+
   placeBet(): boolean {
     if (this._balance >= this._bet) {
       this._balance -= this._bet;
@@ -31,26 +37,21 @@ export class GameState extends EventEmitter<GameStateEvents> {
     return false;
   }
 
-  calculateResult(): { won: boolean; amount: number } {
-    const winThreshold = 1 - GAME_CONFIG.gameplay.winChance;
-    const won = Math.random() > winThreshold;
+  /** Generate spin result based on real payline evaluation. Call BEFORE spinning the reels. */
+  resolveSpinResult(): SpinResult {
+    const result = generateSpinResult(this._bet);
+    this._lastResult = result;
 
-    if (won) {
-      const multiplier = Math.floor(
-        Math.random() *
-          (GAME_CONFIG.gameplay.maxWinMultiplier - GAME_CONFIG.gameplay.minWinMultiplier + 1) +
-          GAME_CONFIG.gameplay.minWinMultiplier
-      );
-      const amount = this._bet * multiplier;
-      this._lastWin = amount;
-      this._balance += amount;
-      this.emit('win', { amount });
-      return { won: true, amount };
+    if (result.totalWin > 0) {
+      this._lastWin = result.totalWin;
+      this._balance += result.totalWin;
+      this.emit('win', { amount: result.totalWin, winningLines: result.winningLines });
+    } else {
+      this._lastWin = 0;
+      this.emit('lose', undefined);
     }
 
-    this._lastWin = 0;
-    this.emit('lose', undefined);
-    return { won: false, amount: 0 };
+    return result;
   }
 
   increaseBet(step: number = GAME_CONFIG.gameplay.minBetStep): void {

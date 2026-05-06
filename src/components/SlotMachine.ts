@@ -2,6 +2,7 @@ import { Application, Container, Ticker } from 'pixi.js';
 import { Reel, SYMBOL_W, SYMBOL_H, VISIBLE_ROWS } from './Reel';
 import { EventEmitter } from '../utils/EventEmitter';
 import { GAME_CONFIG } from '../config/GameConfig';
+import { SymbolKey } from '../assets/assets';
 
 const REEL_COUNT = 6;
 const REEL_CASCADE_MS = GAME_CONFIG.animation.reelCascadeMS;
@@ -45,6 +46,13 @@ export class SlotMachine extends Container {
 
   onSpinComplete(listener: () => void): void {
     this.gameEvents.on('spinComplete', listener);
+  }
+
+  /** Set the symbols each reel should land on. grid[col] = array of 5 SymbolKeys (top to bottom). */
+  setResult(grid: SymbolKey[][]): void {
+    for (let i = 0; i < this.reels.length && i < grid.length; i++) {
+      this.reels[i].setTargetSymbols(grid[i]);
+    }
   }
 
   async startSpin() {

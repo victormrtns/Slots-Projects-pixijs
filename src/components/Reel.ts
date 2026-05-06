@@ -41,6 +41,9 @@ export class Reel extends Container {
   private animFrame = 0;
   private animTimer = 0;
 
+  /** If set, the reel will land on these symbols (one per visible row) instead of random. */
+  private targetSymbols: SymbolKey[] | null = null;
+
   constructor() {
     super();
 
@@ -76,6 +79,11 @@ export class Reel extends Container {
     return new Promise((resolve) => {
       this.resolveStop = resolve;
     });
+  }
+
+  /** Set the symbols this reel should land on (one per visible row, top to bottom). */
+  setTargetSymbols(symbols: SymbolKey[]): void {
+    this.targetSymbols = symbols;
   }
 
   update(delta: number) {
@@ -148,10 +156,39 @@ export class Reel extends Container {
   }
 
   private randomiseSymbols() {
-    for (const s of this.symbols) {
-      s.symbolKey = randomSymbolKey();
-      s.frameOffset = Math.floor(Math.random() * SYMBOL_ANIM_FRAMES);
-      s.texture = Texture.from(frameKey(s.symbolKey, this.animFrame + s.frameOffset));
+    if (this.targetSymbols) {
+      // Find which strip symbols are currently visible (inside the mask area)
+      // and assign target symbols to them top-to-bottom
+      const visibleArea = SYMBOL_H * VISIBLE_ROWS;
+      const visible = this.symbols
+        .map((s, idx) => ({ sprite: s, idx, y: s.y }))
+        .filter((entry) => entry.y > -SYMBOL_H / 2 && entry.y < visibleArea + SYMBOL_H / 2)
+        .sort((a, b) => a.y - b.y);
+
+      for (let i = 0; i < visible.length && i < this.targetSymbols.length; i++) {
+        const s = visible[i].sprite;
+        s.symbolKey = this.targetSymbols[i];
+        s.frameOffset = Math.floor(Math.random() * SYMBOL_ANIM_FRAMES);
+        s.texture = Texture.from(frameKey(s.symbolKey, this.animFrame + s.frameOffset));
+      }
+
+      // Randomise the offscreen symbols
+      for (const s of this.symbols) {
+        const isVisible = visible.some((v) => v.sprite === s);
+        if (!isVisible) {
+          s.symbolKey = randomSymbolKey();
+          s.frameOffset = Math.floor(Math.random() * SYMBOL_ANIM_FRAMES);
+          s.texture = Texture.from(frameKey(s.symbolKey, this.animFrame + s.frameOffset));
+        }
+      }
+
+      this.targetSymbols = null;
+    } else {
+      for (const s of this.symbols) {
+        s.symbolKey = randomSymbolKey();
+        s.frameOffset = Math.floor(Math.random() * SYMBOL_ANIM_FRAMES);
+        s.texture = Texture.from(frameKey(s.symbolKey, this.animFrame + s.frameOffset));
+      }
     }
   }
 
