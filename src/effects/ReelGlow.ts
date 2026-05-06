@@ -11,6 +11,7 @@ interface ReelGlowConfig {
 export class ReelGlow {
   private container: Container = new Container();
   private ticker: Ticker;
+  private activeCallback: ((ticker: { deltaMS: number }) => void) | null = null;
 
   constructor(ticker: Ticker) {
     this.ticker = ticker;
@@ -18,11 +19,12 @@ export class ReelGlow {
 
   play(config: ReelGlowConfig): void {
     const { x, y, width, height } = config;
+    const GLOW_INITIAL_ALPHA = 0.42;
 
     const glow = new Graphics();
-    glow.rect(x - 16, y - 16, width + 32, height + 32);
-    glow.fill({ color: 0xffdd00, alpha: 0.42 });
-    glow.filters = [new BlurFilter({ strength: 32 })];
+    glow.rect(x, y, width, height);
+    glow.fill({ color: 0xffdd00, alpha: GLOW_INITIAL_ALPHA });
+    glow.filters = [new BlurFilter({ strength: 12 })];
 
     this.container.addChild(glow);
 
@@ -30,15 +32,16 @@ export class ReelGlow {
 
     const update = (ticker: { deltaMS: number }) => {
       elapsedMs += ticker.deltaMS;
-      glow.alpha = Math.max(0, 0.42 - (elapsedMs / GAME_CONFIG.animation.glowDurationMS) * 0.42);
+      glow.alpha = Math.max(0, GLOW_INITIAL_ALPHA * (1 - elapsedMs / GAME_CONFIG.animation.glowDurationMS));
 
       if (elapsedMs >= GAME_CONFIG.animation.glowDurationMS) {
-        this.ticker.remove(update as Parameters<typeof this.ticker.add>[0]);
+        this.removeTicker(update);
         this.container.removeChild(glow);
         glow.destroy();
       }
     };
 
+    this.activeCallback = update;
     this.ticker.add(update as Parameters<typeof this.ticker.add>[0]);
   }
 
@@ -47,7 +50,16 @@ export class ReelGlow {
   }
 
   clear(): void {
+    if (this.activeCallback) {
+      this.removeTicker(this.activeCallback);
+    }
     this.container.removeChildren();
   }
-}
 
+  private removeTicker(cb: (ticker: { deltaMS: number }) => void): void {
+    this.ticker.remove(cb as Parameters<typeof this.ticker.add>[0]);
+    if (this.activeCallback === cb) {
+      this.activeCallback = null;
+    }
+  }
+}

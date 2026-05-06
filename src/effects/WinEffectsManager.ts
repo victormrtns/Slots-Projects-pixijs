@@ -2,7 +2,6 @@ import { Container, Ticker, Rectangle } from 'pixi.js';
 import { CoinShower } from './CoinShower';
 import { BigWinAnimation } from './BigWinAnimation';
 import { ReelGlow } from './ReelGlow';
-import { SYMBOL_W, SYMBOL_H, VISIBLE_ROWS } from '../components/Reel';
 
 export class WinEffectsManager {
   private container: Container = new Container();
@@ -29,8 +28,8 @@ export class WinEffectsManager {
     this.reelGlow.play({
       x: reelBounds.x - 16,
       y: reelBounds.y - 16,
-      width: reelBounds.width,
-      height: reelBounds.height,
+      width: reelBounds.width + 32,
+      height: reelBounds.height + 32,
     });
 
     this.coinShower.play({

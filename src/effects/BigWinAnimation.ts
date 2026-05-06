@@ -11,17 +11,20 @@ interface BigWinConfig {
 export class BigWinAnimation {
   private container: Container = new Container();
   private ticker: Ticker;
-  private bigWinKeys: string[] = getBigWinKeys();
+  private bigWinTextures: Texture[];
+  private activeCallback: ((ticker: { deltaMS: number }) => void) | null = null;
 
   constructor(ticker: Ticker) {
     this.ticker = ticker;
+    // Pre-cache textures once
+    this.bigWinTextures = getBigWinKeys().map((k) => Texture.from(k));
   }
 
   play(config: BigWinConfig): void {
-    if (this.bigWinKeys.length === 0) return;
+    if (this.bigWinTextures.length === 0) return;
 
     const { cx, cy, targetWidth } = config;
-    const sprite = new Sprite(Texture.from(this.bigWinKeys[0]));
+    const sprite = new Sprite(this.bigWinTextures[0]);
     sprite.anchor.set(0.5);
     sprite.scale.set(targetWidth / sprite.texture.width);
     sprite.x = cx;
@@ -30,29 +33,31 @@ export class BigWinAnimation {
     this.container.addChild(sprite);
 
     let frame = 0;
-    let timer = 0;
+    let timerMs = 0;
     let loops = 0;
+    const stepMs = 1000 / GAME_CONFIG.animation.bigWinFPS;
 
     const update = (ticker: { deltaMS: number }) => {
-      timer += ticker.deltaMS;
-      if (timer < 1000 / GAME_CONFIG.animation.bigWinFPS) return;
-      timer -= 1000 / GAME_CONFIG.animation.bigWinFPS;
+      timerMs += ticker.deltaMS;
+      if (timerMs < stepMs) return;
+      timerMs -= stepMs;
 
       frame++;
-      if (frame >= this.bigWinKeys.length) {
+      if (frame >= this.bigWinTextures.length) {
         frame = 0;
         loops++;
         if (loops >= GAME_CONFIG.animation.bigWinLoops) {
-          this.ticker.remove(update as Parameters<typeof this.ticker.add>[0]);
+          this.removeTicker(update);
           this.container.removeChild(sprite);
           sprite.destroy();
           return;
         }
       }
 
-      sprite.texture = Texture.from(this.bigWinKeys[frame]);
+      sprite.texture = this.bigWinTextures[frame];
     };
 
+    this.activeCallback = update;
     this.ticker.add(update as Parameters<typeof this.ticker.add>[0]);
   }
 
@@ -61,6 +66,16 @@ export class BigWinAnimation {
   }
 
   clear(): void {
+    if (this.activeCallback) {
+      this.removeTicker(this.activeCallback);
+    }
     this.container.removeChildren();
+  }
+
+  private removeTicker(cb: (ticker: { deltaMS: number }) => void): void {
+    this.ticker.remove(cb as Parameters<typeof this.ticker.add>[0]);
+    if (this.activeCallback === cb) {
+      this.activeCallback = null;
+    }
   }
 }
