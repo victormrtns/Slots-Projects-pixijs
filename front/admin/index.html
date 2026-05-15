@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slot Admin</title>
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Slot Admin</h1>
+      <div class="status">
+        <span id="refresh-status">live</span>
+        <button id="refresh-btn">refresh now</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="cards">
+        <div class="card"><div class="card-label">Total Spins</div><div class="card-value" id="stat-spins">—</div></div>
+        <div class="card"><div class="card-label">Total Bet</div><div class="card-value" id="stat-bet">—</div></div>
+        <div class="card"><div class="card-label">Total Paid</div><div class="card-value" id="stat-paid">—</div></div>
+        <div class="card"><div class="card-label">RTP</div><div class="card-value" id="stat-rtp">—</div></div>
+        <div class="card"><div class="card-label">Big Wins</div><div class="card-value" id="stat-bigwins">—</div></div>
+        <div class="card"><div class="card-label">Biggest Win</div><div class="card-value" id="stat-biggest">—</div></div>
+      </section>
+
+      <section>
+        <h2>Recent Spins</h2>
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Time</th><th>Bet</th><th>Win</th><th>x</th><th>Tier</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script type="module" src="./admin.ts"></script>
+  </body>
+</html>

@@ -191,17 +191,15 @@ export class HomeScene extends Container {
     this.winLbl.text = '$0';
     this.foxCharacter.setMode('idle');
 
-    if (!this.gameState.placeBet()) {
+    const result = await this.gameState.requestSpin();
+    if (!result) {
       this.spinning = false;
       this.setSpinEnabled(true);
       return;
     }
 
-    this.updateLabels();
-
-    // Calculate result BEFORE spinning — determines which symbols the reels land on
-    const result = this.gameState.resolveSpinResult();
     this.slotMachine.setResult(result.grid);
+    this.updateLabels();
 
     await this.slotMachine.startSpin();
   }
@@ -219,12 +217,17 @@ export class HomeScene extends Container {
       6 * SYMBOL_W,
       5 * SYMBOL_H
     );
-    const tier = BigWinAnimation.resolveTier(this.gameState.lastWin, this.gameState.bet);
+    const tier = this.gameState.lastTier !== 'none'
+      ? this.gameState.lastTier
+      : BigWinAnimation.resolveTier(this.gameState.lastWin, this.gameState.bet);
     this.winEffectsManager.triggerAll(reelBounds, tier);
   }
 
   private initializeGameState() {
     this.updateLabels();
+    this.gameState.on('balance', () => this.updateLabels());
+    this.gameState.on('error', (e) => console.error('[spin] backend error:', e.message));
+    this.gameState.initialize().then(() => this.updateLabels());
   }
 
   private async fadeInScene(app: Application) {
